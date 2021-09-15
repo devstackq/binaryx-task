@@ -1,17 +1,17 @@
 package models
 
 type Wallet struct {
-	UID string
-	Currency struct{}//btc || eth                                                                                                                                                                                                                                                                                                                                                                                                                                   
+	UID      string
+	Currency struct{} //btc || eth
 
 }
 
 type AccountEth struct {
-	Name string
+	Name    string
 	Balance int
 }
 
 type AccountBtc struct {
-	Name string
+	Name    string
 	Balance int
 }

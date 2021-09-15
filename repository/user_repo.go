@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/devstackq/bynaryx/models"
+	"github.com/devstackq/binaryx/models"
 )
 
 type UserRepository struct {
@@ -20,7 +20,7 @@ func (ur *UserRepository) CreateUser(u models.User) error {
 	VALUES ($1, $2, $3, $4)`
 	_, err := ur.db.Exec(sqlStmt, u.FirstName, u.LastName, u.Email, u.Password, u.UUID)
 	if err != nil {
-	  return err
+		return err
 	}
-return nil
+	return nil
 }

@@ -1,10 +1,16 @@
+package repository
+
+import (
+	"database/sql"
+
+	"github.com/devstackq/binaryx/models"
+)
+
 //use cases, interface - for relaition layer
 type User interface {
 	CreateUser(models.User) error
 }
 
-type Account interface {
-}
 type Repository struct {
 	User
 }
