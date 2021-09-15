@@ -30,29 +30,27 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func (us *UserService) CreateUser(user models.User) error {
+func (us *UserService) CreateUser(user *models.User) error {
 
-	u := models.User{}
-	if len(u.Password) < 8 {
+	if len(user.Password) < 8 {
 		return errors.New("password length must be more 8")
 	}
-	if len(u.FirstName) < 1 {
+	if len(user.FirstName) < 1 {
 		return errors.New("first name field not empty")
 	}
-	if len(u.LastName) < 1 {
+	if len(user.LastName) < 1 {
 		return errors.New("last name field not empty")
 	}
 
-	if !validDomain(u.Email) {
+	if !validDomain(user.Email) {
 		return errors.New("invalid email domain")
 	}
-
-	hash, err := HashPassword(u.Password)
+	hash, err := HashPassword(user.Password)
 	if err != nil {
-		return errors.New("hash pwd error")
 		log.Println(err)
+		return errors.New("hash pwd error")
 	}
-	u.Password = hash
+	user.Password = hash
 
 	uuid := uuid.Must(uuid.NewV4(), err).String()
 	if err != nil {
@@ -60,7 +58,7 @@ func (us *UserService) CreateUser(user models.User) error {
 		return errors.New("uuid error")
 	}
 
-	u.UUID = uuid
+	user.UUID = uuid
 
 	us.repository.CreateUser(user)
 

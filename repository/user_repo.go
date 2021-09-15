@@ -14,7 +14,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db}
 }
 
-func (ur *UserRepository) CreateUser(u models.User) error {
+func (ur *UserRepository) CreateUser(u *models.User) error {
 	sqlStmt := `
 	INSERT INTO users (firstname, lastname, email, password, uuid)
 	VALUES ($1, $2, $3, $4)`

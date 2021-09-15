@@ -20,12 +20,22 @@ func NewServer() *Server {
 	if err != nil {
 		log.Println(err, "err create tables")
 	}
-	// defer db.Close()
+
 	//chain interface relation between layer -> repos->services->handlers
 	//outer layer connect -> inner - with interfaces, then realize interfaces
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handler := handler.NewHandler(services)
+
+	//create firstly currincies, btc & eth
+	err = services.Wallet.AddCurrency("BTC", 40000.0)
+	if err != nil {
+		log.Println(err)
+	}
+	err = services.Wallet.AddCurrency("ETH", 1500.0)
+	if err != nil {
+		log.Println(err)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -36,8 +46,8 @@ func NewServer() *Server {
 		http: &http.Server{
 			Addr:         port,
 			Handler:      handler.InitRouter(),
-			WriteTimeout: 10 * time.Second,
-			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 6 * time.Second,
+			ReadTimeout:  6 * time.Second,
 		},
 	}
 	return s

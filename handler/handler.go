@@ -10,21 +10,44 @@ import (
 type Handler struct {
 	Services *service.Service
 }
+type Route struct {
+	Path    string
+	Handler http.HandlerFunc
+	IsAuth  bool
+}
 
 func NewHandler(s *service.Service) *Handler {
 	return &Handler{s}
 }
 
-//data save in db psql, tables : user, wallet, coins,
-//backend- start - docker container run..
-//use interface - poluymorphism -> each wallet - 1 method
-//use gorutine
-//use middleware - auth user
-//handlers, enpoint1 /signup, /signin, /wallet, /transfer, /transaction
-
 func (h *Handler) InitRouter() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/signup", h.Signup) //post:fields, fname, lname, email, age
+
+	routes := h.createRoutes()
+
 	log.Println("created routers")
+	mux := http.NewServeMux()
+	//add middleware each auth route
+	for _, route := range routes {
+		if route.IsAuth {
+			// route.Handler = h.IsCookieValid(route.Handler)
+		}
+		mux.HandleFunc(route.Path, route.Handler)
+	}
 	return mux
+}
+
+func (h *Handler) createRoutes() []Route {
+
+	return []Route{
+		{
+			Path:    "/signup",
+			Handler: h.Signup,
+			IsAuth:  false,
+		},
+		// {
+		// 	Path:    "/account",
+		// 	Handler: h.GetAccount,
+		// 	IsAuth:  true,
+		// },
+	}
 }
