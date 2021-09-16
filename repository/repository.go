@@ -15,6 +15,7 @@ type User interface {
 type Wallet interface {
 	AddCurrency(string, float64) error
 	InitBalance(*models.Account) error
+	GetAccountsByEmail(string) ([]models.Account, error)
 }
 
 type Repository struct {

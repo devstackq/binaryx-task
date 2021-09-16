@@ -12,6 +12,13 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+type Claims struct {
+	Email string `json:"email,omitempty"`
+	jwt.StandardClaims
+}
+
+var JwtSecret = []byte("secret_key")
+
 func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
 
 	u := models.User{}
@@ -44,13 +51,6 @@ func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-type Claims struct {
-	email string
-	jwt.StandardClaims
-}
-
-var jwtSecret = []byte("secret_key")
-
 func (h *Handler) Signin(w http.ResponseWriter, r *http.Request) {
 
 	u := models.User{}
@@ -72,7 +72,7 @@ func (h *Handler) Signin(w http.ResponseWriter, r *http.Request) {
 	expirationTime := time.Now().Add(15 * time.Minute)
 	// Create the JWT claims, which includes the username and expiry time
 	claims := &Claims{
-		email: u.Email,
+		Email: u.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -81,7 +81,7 @@ func (h *Handler) Signin(w http.ResponseWriter, r *http.Request) {
 	// Declare the token with the algorithm used for signing, and the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString(jwtSecret)
+	tokenString, err := token.SignedString(JwtSecret)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)

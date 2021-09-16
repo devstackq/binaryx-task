@@ -35,7 +35,6 @@ func (h *Handler) validJwtToken(f http.HandlerFunc) http.HandlerFunc {
 func (h *Handler) InitRouter() *http.ServeMux {
 
 	routes := h.createRoutes()
-
 	log.Println("created routers")
 	mux := http.NewServeMux()
 	for _, route := range routes {
@@ -65,9 +64,9 @@ func (h *Handler) createRoutes() []Route {
 			Handler: h.GetAccounts,
 			IsAuth:  true,
 		},
-		// 	Path:    "/transfers",
-		// 	Handler: h.GetAccount,
-		// 	IsAuth:  true,
-		// },
+			Path:    "/transfer",
+			Handler: h.TransferMoney,
+			IsAuth:  true,
+		},
 	}
 }

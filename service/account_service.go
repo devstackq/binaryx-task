@@ -11,9 +11,17 @@ type WalletService struct {
 
 func NewWalletService(repo repository.Wallet) *WalletService {
 	return &WalletService{repo}
+
+}
+func (ws *WalletService) GetAccounts(email string) ([]models.Account, error) {
+	seqAcc, err := ws.repository.GetAccountsByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return seqAcc, nil
 }
 func (ws *WalletService) AddCurrency(name string, cost float64) error {
-
+	//valid params
 	err := ws.repository.AddCurrency(name, cost)
 	if err != nil {
 		return err
