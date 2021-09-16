@@ -8,6 +8,7 @@ import (
 //business logic
 type User interface {
 	CreateUser(*models.User) error
+	Signin(*models.User) error
 }
 type Wallet interface {
 	InitBalance(*models.Account) error

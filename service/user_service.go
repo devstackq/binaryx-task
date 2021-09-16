@@ -29,6 +29,10 @@ func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
 
 func (us *UserService) CreateUser(user *models.User) error {
 
@@ -51,7 +55,7 @@ func (us *UserService) CreateUser(user *models.User) error {
 		return errors.New("hash pwd error")
 	}
 	user.Password = hash
-
+	//set uuid -> each new user, uniq id, wallets -> see uuid
 	uuid := uuid.Must(uuid.NewV4(), err).String()
 	if err != nil {
 		log.Println(err)
@@ -63,4 +67,20 @@ func (us *UserService) CreateUser(user *models.User) error {
 	us.repository.CreateUser(user)
 
 	return nil
+}
+
+func (us *UserService) Signin(u *models.User) error {
+	if ok := validDomain(u.Email); ok {
+		dbPassword, err := us.repository.GetUserPassword(u.Email)
+		if err != nil {
+			return errors.New("incorrect email")
+
+		}
+		if ok := CheckPasswordHash(u.Password, dbPassword); ok {
+			return nil
+		} else {
+			return errors.New("incorrect password")
+		}
+	}
+	return errors.New("invalid email domain")
 }

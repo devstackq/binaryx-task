@@ -8,6 +8,7 @@ import (
 
 //use cases, interface - for relaition layer
 type User interface {
+	GetUserPassword(string) (string, error)
 	CreateUser(*models.User) error
 }
 

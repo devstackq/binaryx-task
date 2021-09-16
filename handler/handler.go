@@ -20,16 +20,27 @@ func NewHandler(s *service.Service) *Handler {
 	return &Handler{s}
 }
 
+func (h *Handler) validJwtToken(f http.HandlerFunc) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, err := r.Cookie("jwt_token")
+		if err != nil {
+			log.Println(err, "err jwt token")
+			return
+		}
+		f.ServeHTTP(w, r)
+	}
+}
+
 func (h *Handler) InitRouter() *http.ServeMux {
 
 	routes := h.createRoutes()
 
 	log.Println("created routers")
 	mux := http.NewServeMux()
-	//add middleware each auth route
 	for _, route := range routes {
 		if route.IsAuth {
-			// route.Handler = h.IsCookieValid(route.Handler)
+			route.Handler = h.validJwtToken(route.Handler)
 		}
 		mux.HandleFunc(route.Path, route.Handler)
 	}
@@ -44,8 +55,17 @@ func (h *Handler) createRoutes() []Route {
 			Handler: h.Signup,
 			IsAuth:  false,
 		},
-		// {
-		// 	Path:    "/account",
+		{
+			Path:    "/signin",
+			Handler: h.Signin,
+			IsAuth:  false,
+		},
+		{
+			Path:    "/wallets",
+			Handler: h.GetAccounts,
+			IsAuth:  true,
+		},
+		// 	Path:    "/transfers",
 		// 	Handler: h.GetAccount,
 		// 	IsAuth:  true,
 		// },
