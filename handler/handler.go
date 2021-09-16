@@ -64,9 +64,11 @@ func (h *Handler) createRoutes() []Route {
 			Handler: h.GetAccounts,
 			IsAuth:  true,
 		},
+		{
 			Path:    "/transfer",
 			Handler: h.TransferMoney,
 			IsAuth:  true,
 		},
 	}
+
 }

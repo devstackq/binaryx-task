@@ -1,10 +1,13 @@
 package models
 
 type Account struct {
-	CurrencyName string
-	CurrencyCost float64
-	UUID         string
-	Balance      float64
-	CurrencyId   int
-	Email        string
+	CurrencyName string  `json:"currentname"`
+	CurrencyCost float64 `json:"currencycost"`
+	UUID         string  `json:"uuid"`
+	Balance      float64 `json:"balance"`
+	CurrencyId   int     `json:"currencuid"`
+	Email        string  `json:"email"`
+
+	Recepient string  `json:"recepient"`
+	Amount    float64 `json:"amount"`
 }

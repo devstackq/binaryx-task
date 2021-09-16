@@ -13,7 +13,33 @@ type WalletRepository struct {
 func NewWalletRepository(db *sql.DB) *WalletRepository {
 	return &WalletRepository{db}
 }
+func (wr *WalletRepository) Transfer(account *models.Account) error {
+	account.Balance -= account.Amount
+	//update, current user, then receipment
+	sqlStatement := `
+		UPDATE wallets
+		SET balance = $1
+		WHERE uuid = $2;`
+	_, err := wr.db.Exec(sqlStatement, account.Balance, account.UUID)
+	if err != nil {
+		return err
+	}
 
+	update receipment, get balance receipment, update value +=
+	try 1 sql query
+		return nil
+}
+
+func (wr *WalletRepository) CheckWallet(account *models.Account) (*models.Account, error) {
+	//email - uuid, - wallets -> get balance
+	sqlStatement := `SELECT balance FROM wallets WHERE email=$1 AND currencyid =$2;`
+	row := wr.db.QueryRow(sqlStatement, account.Email, account.CurrencyId)
+	err := row.Scan(&account.Balance)
+	if err != nil {
+		return nil, err
+	}
+	return account, nil
+}
 func (wr *WalletRepository) GetAccountsByEmail(email string) ([]models.Account, error) {
 	uuid, err := wr.GetUUIDByEmail(email)
 	if err != nil {

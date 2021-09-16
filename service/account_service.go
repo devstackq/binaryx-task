@@ -28,6 +28,21 @@ func (ws *WalletService) AddCurrency(name string, cost float64) error {
 	}
 	return nil
 }
+func (ws *WalletService) TransferMoney(acc *models.Account) error {
+	var err error
+	acc, err = ws.repository.CheckWallet(acc)
+	if err != nil {
+		return err
+	}
+	if acc.Balance >= acc.Amount {
+
+		err = ws.repository.Transfer(acc)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func (ws *WalletService) InitBalance(w *models.Account) error {
 	//check valid data, if user exist && web token valid ?
