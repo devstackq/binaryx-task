@@ -17,7 +17,8 @@ type Wallet interface {
 	InitBalance(*models.Account) error
 	GetAccountsByEmail(string) ([]models.Account, error)
 	CheckWallet(*models.Account) (*models.Account, error)
-	Transfer(*models.Account) error
+	Transfer(*models.Account, *models.Account) error
+	GetUUIDByEmail(string) (string, error)
 }
 
 type Repository struct {

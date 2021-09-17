@@ -29,6 +29,7 @@ func NewServer() *Server {
 
 	//create firstly currincies, btc & eth
 	err = services.Wallet.AddCurrency("BTC", 40000.0)
+	//check if !exist field ->insert new currency
 	if err != nil {
 		log.Println(err)
 	}
@@ -41,7 +42,7 @@ func NewServer() *Server {
 	if port == "" {
 		port = ":8081"
 	}
-	//custom server
+	//custom server, set port, cusom routers, read/write timeout
 	s := &Server{
 		http: &http.Server{
 			Addr:         port,

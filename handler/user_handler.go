@@ -69,6 +69,7 @@ func (h *Handler) Signin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	//if req data ok -> set jwt token -> redirect profile page..
 	expirationTime := time.Now().Add(15 * time.Minute)
 	// Create the JWT claims, which includes the username and expiry time
 	claims := &Claims{
@@ -88,13 +89,12 @@ func (h *Handler) Signin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//if ok - set client side
+	//if ok - set jwt client side
 	http.SetCookie(w, &http.Cookie{
 		Name:    "jwt_token",
 		Value:   tokenString,
 		Expires: expirationTime,
 	})
-
 	log.Println("set jwt,", tokenString)
 	w.WriteHeader(http.StatusOK)
 }

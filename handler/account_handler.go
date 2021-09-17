@@ -10,13 +10,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-//счет
-type Customer interface {
-	GetAccount()
-	UpdateAccount()
-	TransferMoney()
-}
-
 func ParseToken(tokenStr string) (*Claims, error) {
 	var claims *Claims
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
@@ -69,18 +62,17 @@ func (h *Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) TransferMoney(w http.ResponseWriter, r *http.Request) {
-	// get by email - uuid1, uuid2 -> send transfer, update wallets field - balnce when transfer done
-	//get by jwt, email, uuid -> body {who, cash, }
-	//check if money norm -> trnasfer
 	a := models.Account{}
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	err = json.Unmarshal(b, &a)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	email, err := h.GetEmailByJwt(w, r)
@@ -94,7 +86,8 @@ func (h *Handler) TransferMoney(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-
+	w.WriteHeader(200)
+	log.Println("success transfer")
 }
 
 //metdos realize, each currency?

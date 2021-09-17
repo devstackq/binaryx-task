@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/devstackq/binaryx/models"
 	"github.com/devstackq/binaryx/repository"
 )
@@ -30,14 +32,40 @@ func (ws *WalletService) AddCurrency(name string, cost float64) error {
 }
 func (ws *WalletService) TransferMoney(acc *models.Account) error {
 	var err error
+	//current user check balance
+	uuid, err := ws.repository.GetUUIDByEmail(acc.Email)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	acc.UUID = uuid
+
 	acc, err = ws.repository.CheckWallet(acc)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	if acc.Balance >= acc.Amount {
+		rec := models.Account{
+			Email:      acc.Recepient,
+			CurrencyId: acc.CurrencyId,
+		}
 
-		err = ws.repository.Transfer(acc)
+		uuid, err := ws.repository.GetUUIDByEmail(rec.Email)
 		if err != nil {
+			log.Println(err)
+		}
+		rec.UUID = uuid
+		//get balance by email
+		recepient, err := ws.repository.CheckWallet(&rec)
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		//current - amount, recepinet + amount
+		err = ws.repository.Transfer(acc, recepient)
+		if err != nil {
+			log.Println(err)
 			return err
 		}
 	}
@@ -51,6 +79,4 @@ func (ws *WalletService) InitBalance(w *models.Account) error {
 		return err
 	}
 	return nil
-	//get registered user -> email, realation, Wallet - currency1, currency2 -> setDef vBalamnce 100, save in sql Db
-	// get by email uuid -> insert 2 new balance , then - every time update
 }

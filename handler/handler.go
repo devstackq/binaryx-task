@@ -20,6 +20,7 @@ func NewHandler(s *service.Service) *Handler {
 	return &Handler{s}
 }
 
+//middleware, check valid token, token expires 15min
 func (h *Handler) validJwtToken(f http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +36,6 @@ func (h *Handler) validJwtToken(f http.HandlerFunc) http.HandlerFunc {
 func (h *Handler) InitRouter() *http.ServeMux {
 
 	routes := h.createRoutes()
-	log.Println("created routers")
 	mux := http.NewServeMux()
 	for _, route := range routes {
 		if route.IsAuth {
@@ -49,26 +49,29 @@ func (h *Handler) InitRouter() *http.ServeMux {
 func (h *Handler) createRoutes() []Route {
 
 	return []Route{
+		//firstname, lastname, email, password
 		{
 			Path:    "/signup",
 			Handler: h.Signup,
 			IsAuth:  false,
 		},
+		//email, password
 		{
 			Path:    "/signin",
 			Handler: h.Signin,
 			IsAuth:  false,
 		},
+		//get query(authorized user)
 		{
 			Path:    "/wallets",
 			Handler: h.GetAccounts,
 			IsAuth:  true,
 		},
+		//recepient(email), amount, currencyid
 		{
 			Path:    "/transfer",
 			Handler: h.TransferMoney,
 			IsAuth:  true,
 		},
 	}
-
 }

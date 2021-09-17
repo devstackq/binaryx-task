@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/devstackq/binaryx/models"
 )
@@ -13,28 +14,45 @@ type WalletRepository struct {
 func NewWalletRepository(db *sql.DB) *WalletRepository {
 	return &WalletRepository{db}
 }
-func (wr *WalletRepository) Transfer(account *models.Account) error {
+func (wr *WalletRepository) Transfer(account *models.Account, recepient *models.Account) error {
+	// try 1 sql query, dry
 	account.Balance -= account.Amount
-	//update, current user, then receipment
-	sqlStatement := `
+	recepient.Balance += account.Amount
+
+	sqlSender := `
 		UPDATE wallets
 		SET balance = $1
-		WHERE uuid = $2;`
-	_, err := wr.db.Exec(sqlStatement, account.Balance, account.UUID)
+		WHERE uuid = $2 AND currencyid=$3;
+		`
+	_, err := wr.db.Exec(sqlSender, account.Balance, account.UUID, account.CurrencyId)
 	if err != nil {
 		return err
 	}
 
-	update receipment, get balance receipment, update value +=
-	try 1 sql query
-		return nil
+	sqlRecepient := `
+		UPDATE wallets
+		SET balance = $1
+		WHERE uuid = $2 AND currencyid=$3;
+		`
+	_, err = wr.db.Exec(sqlRecepient, recepient.Balance, recepient.UUID, recepient.CurrencyId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (wr *WalletRepository) CheckWallet(account *models.Account) (*models.Account, error) {
 	//email - uuid, - wallets -> get balance
-	sqlStatement := `SELECT balance FROM wallets WHERE email=$1 AND currencyid =$2;`
-	row := wr.db.QueryRow(sqlStatement, account.Email, account.CurrencyId)
-	err := row.Scan(&account.Balance)
+	log.Print(account)
+	uuid, err := wr.GetUUIDByEmail(account.Email)
+	if err != nil {
+		return nil, err
+	}
+	account.UUID = uuid
+
+	sqlStatement := `SELECT balance FROM wallets WHERE uuid=$1 AND currencyid =$2;`
+	row := wr.db.QueryRow(sqlStatement, account.UUID, account.CurrencyId)
+	err = row.Scan(&account.Balance)
 	if err != nil {
 		return nil, err
 	}
@@ -47,14 +65,14 @@ func (wr *WalletRepository) GetAccountsByEmail(email string) ([]models.Account, 
 	}
 	var acc models.Account
 	var seqAcc []models.Account
-	rows, err := wr.db.Query("SELECT c.name, c.cost, w.balance, w.email  FROM wallets w LEFT JOIN currencies c ON c.id = w.currencyid  WHERE w.uuid=$1  ", uuid)
+	rows, err := wr.db.Query("SELECT c.name, c.cost, w.balance FROM wallets w LEFT JOIN currencies c ON c.id = w.currencyid  WHERE w.uuid=$1  ", uuid)
 	if err != nil {
 		return nil, err
 	}
 
 	for rows.Next() {
 		//query getUsername byPostId
-		if err := rows.Scan(&acc.CurrencyName, &acc.CurrencyCost, &acc.Balance, &acc.Email); err != nil {
+		if err := rows.Scan(&acc.CurrencyName, &acc.CurrencyCost, &acc.Balance); err != nil {
 			return nil, err
 		}
 		seqAcc = append(seqAcc, acc)
@@ -73,8 +91,6 @@ func (wr *WalletRepository) AddCurrency(name string, cost float64) error {
 	return nil
 }
 
-//next step, get list account: by email, get Id, by uuid - get List wallets left join - currencies,
-
 func (wr *WalletRepository) GetUUIDByEmail(email string) (string, error) {
 	var uuid string
 	sqlStatement := `SELECT id FROM users WHERE email=$1;`
@@ -86,7 +102,7 @@ func (wr *WalletRepository) GetUUIDByEmail(email string) (string, error) {
 	return uuid, nil
 }
 
-//currency eth -> wallet1, etc
+//set new user - 2 currency, btc, eth
 func (wr *WalletRepository) InitBalance(acc *models.Account) error {
 
 	sqlStatement := `SELECT id FROM users WHERE email=$1;`
